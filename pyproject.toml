@@ -6,12 +6,14 @@ authors = ["YadaYuki <yada.yuki@fuji.waseda.jp>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+requests = "^2.27.1"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.931"
 isort = "^5.10.1"
 flake8 = "^4.0.1"
 black = "^22.1.0"
+types-requests = "^2.27.10"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
