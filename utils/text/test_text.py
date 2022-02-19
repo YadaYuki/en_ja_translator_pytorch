@@ -2,9 +2,8 @@ from os.path import join
 
 import torch
 from const.path import TOK_CORPUS_PATH
-
-from utils.text import text_to_tensor
-from utils.vocab import BOS, EOS, UNK, get_vocab
+from utils.text.text import tensor_to_text, text_to_tensor
+from utils.text.vocab import BOS, EOS, UNK, get_vocab
 
 
 def test_text_to_tensor() -> None:
@@ -20,3 +19,12 @@ def test_text_to_tensor() -> None:
     expected[2] = vocab[UNK]
     expected[3] = vocab[EOS]
     assert torch.equal(text_to_tensor(his_hogehoge, vocab, 100), expected)
+
+
+def test_tensor_to_text() -> None:
+    vocab = get_vocab(join(TOK_CORPUS_PATH, "kyoto-train.en"))
+
+    # test "his hoge"
+    assert tensor_to_text(text_to_tensor("His hogehoge", vocab, 4), vocab).startswith(
+        f"{BOS} His {UNK} {EOS}"
+    )

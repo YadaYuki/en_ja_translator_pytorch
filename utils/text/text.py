@@ -1,7 +1,8 @@
+from typing import List
+
 import torch
 from torchtext.vocab import Vocab
-
-from utils.vocab import BOS, EOS, PAD, UNK, tokenize_sentence
+from utils.text.vocab import BOS, EOS, PAD, UNK, tokenize_sentence
 
 
 def text_to_tensor(
@@ -23,3 +24,10 @@ def text_to_tensor(
         else:
             tensor[i] = vocab[PAD]
     return tensor
+
+
+def tensor_to_text(tensor: torch.Tensor, vocab: Vocab) -> List[str]:
+    text = []
+    for i in range(tensor.size(0)):
+        text.append(vocab.lookup_token(tensor[i]))
+    return " ".join(text)
