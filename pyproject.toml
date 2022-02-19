@@ -7,6 +7,10 @@ authors = ["YadaYuki <yada.yuki@fuji.waseda.jp>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.27.1"
+scikit-learn = "^1.0.2"
+torch = "^1.10.2"
+torchtext = "^0.11.2"
+pytest = "^7.0.1"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.931"
