@@ -10,7 +10,8 @@ if __name__ == "__main__":
     print(
         vocab.forward(
             tokenize_sentence(
-                "He is reputed to have been the one that spread the practices of tooth brushing , face washing , table manners and cleaning in Japan ."
-            )
+                "<unk> He He is reputed to have been the one that spread the practices of tooth brushing , face washing , table manners and cleaning in Japan . <eos>"
+            ),
+            ["<pad>", "<unk>", "<eos>", "<bos>"],
         )
     )

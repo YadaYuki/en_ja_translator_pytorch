@@ -2,9 +2,25 @@ from typing import Generator, List
 
 from torchtext.vocab import Vocab, build_vocab_from_iterator
 
+PAD = "<pad>"
+UNK = "<unk>"
+EOS = "<eos>"
+BOS = "<bos>"
 
-def get_vocab(path_to_corpus: str) -> Vocab:
-    return build_vocab_from_iterator(_yield_token(path_to_corpus))
+
+def get_vocab(
+    path_to_corpus: str,
+    specials: List[str] = [
+        PAD,
+        UNK,
+        EOS,
+        BOS,
+    ],
+) -> Vocab:
+    return build_vocab_from_iterator(
+        _yield_token(path_to_corpus),
+        specials=specials,
+    )
 
 
 def _yield_token(path_to_corpus: str) -> Generator[List[str], None, None]:
