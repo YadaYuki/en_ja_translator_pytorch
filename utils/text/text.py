@@ -23,7 +23,7 @@ def text_to_tensor(
                 tensor[i] = vocab[UNK]
         else:
             tensor[i] = vocab[PAD]
-    return tensor
+    return tensor.to(torch.long)
 
 
 def tensor_to_text(tensor: torch.Tensor, vocab: Vocab) -> List[str]:
