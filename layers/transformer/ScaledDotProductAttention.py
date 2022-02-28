@@ -10,10 +10,24 @@ class ScaledDotProductAttention(nn.Module):
 
     # TODO: masking
     def forward(
-        self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor
+        self,
+        q: torch.Tensor,
+        k: torch.Tensor,
+        v: torch.Tensor,
+        mask: torch.Tensor = None,
     ) -> torch.Tensor:
         scalar = np.sqrt(self.d_k)
-        attention_weight = nn.functional.softmax(
-            torch.matmul(q, torch.transpose(k, 1, 2)) / scalar, dim=2
-        )
+        attention_weight = torch.matmul(q, torch.transpose(k, 1, 2)) / scalar
+        if mask is not None:
+            if mask.dim() != attention_weight.dim():
+                raise ValueError(
+                    "mask.dim != attention_weight.dim, mask.dim={}, attention_weight.dim={}".format(
+                        mask.dim(), attention_weight.dim()
+                    )
+                )
+            attention_weight = attention_weight.data.masked_fill_(
+                mask, -torch.finfo(torch.float).max
+            )
+        attention_weight = nn.functional.softmax(attention_weight, dim=2)
+
         return torch.matmul(attention_weight, v)
