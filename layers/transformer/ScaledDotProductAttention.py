@@ -8,7 +8,6 @@ class ScaledDotProductAttention(nn.Module):
         super().__init__()
         self.d_k = d_k
 
-    # TODO: masking
     def forward(
         self,
         q: torch.Tensor,
@@ -29,5 +28,4 @@ class ScaledDotProductAttention(nn.Module):
                 mask, -torch.finfo(torch.float).max
             )
         attention_weight = nn.functional.softmax(attention_weight, dim=2)
-
         return torch.matmul(attention_weight, v)

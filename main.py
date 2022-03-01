@@ -79,34 +79,12 @@ if __name__ == "__main__":
     d_k = 5
     t_l = 4
     x = torch.rand(1, batch_size * d_k * t_l).reshape(batch_size, t_l, d_k)
-    # print(x.shape, x)
-    # i次元目とj次元目を転置する.
-    # まぁ、この辺の実装は慣れだなぁ
-    x_t = torch.transpose(x, 1, 2)
-    scalar = np.sqrt(d_k)
-    # print(torch.matmul(x[0], x_t[0]))
-
-    attention_weight = torch.nn.functional.softmax(torch.matmul(x, x_t) / scalar, dim=2)
-    # print(torch.matmul(attention_weight, x))
-    attn = ScaledDotProductAttention(d_k)
-    attn_ans = ScaledDotProductAttentionAns(d_k)
-    m = pad_mask(
-        torch.tensor(
-            [
-                [1, 0, 0, 0],
-                [1, 1, 2, 0],
-            ],
-        ),
-        t_l,
-    )
-    # print(m)
-    mm = torch.tensor(
-        [
-            [1, 0, 0, 0],
-            [1, 1, 2, 0],
-        ]
-    ).eq(0)
-    # print(attn(x, x, x))
-    # print(attn_ans(x, x, x))
-    print(attn(x, x, x, m))
-    print(attn_ans(x, x, x, mm))
+    h = 8
+    print(x)
+    print(x.shape)
+    x = x.unsqueeze(0).repeat(h, 1, 1, 1)
+    print()
+    print(x)
+    print(x.shape)
+    print(x.shape[-1], x.size(-1))
+    print(torch.zeros(5).repeat(batch_size, 2))
