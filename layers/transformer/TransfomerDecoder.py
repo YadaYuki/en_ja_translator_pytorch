@@ -69,6 +69,7 @@ class TransformerDecoder(nn.Module):
     def __init__(
         self,
         vocab_size: int,
+        max_len: int,
         pad_idx: int = 0,
         d_model: int = 512,
         N: int = 6,
@@ -78,7 +79,7 @@ class TransformerDecoder(nn.Module):
         layer_norm_eps: float = 1e-5,
     ) -> None:
         self.embedding = Embeddings(vocab_size, d_model, pad_idx)
-        self.positional_encoding = PositionalEncoding(d_model)
+        self.positional_encoding = PositionalEncoding(d_model, max_len)
         self.decoder_layers = nn.ModuleList(
             [
                 TransformerDecoderLayer(
