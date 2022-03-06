@@ -63,12 +63,14 @@ class TransformerEncoder(nn.Module):
 
         self.positional_encoding = PositionalEncoding(d_model)
 
-        self.encoder_layers = [
-            TransformerEncoderLayer(
-                d_model, d_ff, heads_num, dropout_rate, layer_norm_eps
-            )
-            for _ in range(N)
-        ]
+        self.encoder_layers = nn.ModuleList(
+            [
+                TransformerEncoderLayer(
+                    d_model, d_ff, heads_num, dropout_rate, layer_norm_eps
+                )
+                for _ in range(N)
+            ]
+        )
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
         x = self.embedding(x)

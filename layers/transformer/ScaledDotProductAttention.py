@@ -10,9 +10,9 @@ class ScaledDotProductAttention(nn.Module):
 
     def forward(
         self,
-        q: torch.Tensor,
-        k: torch.Tensor,
-        v: torch.Tensor,
+        q: torch.Tensor,  # target
+        k: torch.Tensor,  # source
+        v: torch.Tensor,  # source
         mask: torch.Tensor = None,
     ) -> torch.Tensor:
         scalar = np.sqrt(self.d_k)
