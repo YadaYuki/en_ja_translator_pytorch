@@ -4,10 +4,11 @@ import importlib
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 
-from const.path import TOK_CORPUS_PATH
-from layers.transformer.FFN import FFN
+# from torch.utils.data import DataLoader
+
+# from const.path import TOK_CORPUS_PATH
+# from layers.transformer.FFN import FFN
 
 
 def pad_mask(x: torch.Tensor, seq_len: int) -> torch.Tensor:
@@ -18,10 +19,14 @@ def pad_mask(x: torch.Tensor, seq_len: int) -> torch.Tensor:
 
 
 if __name__ == "__main__":
-    batch_size = 100
-    seq_len = 10
-    d_model = 512
-    ffn = FFN(d_model=512, d_ff=2048)
-    x = torch.randn(batch_size, seq_len, d_model)
-    print(ffn(x).shape)
-    print(ffn(x))
+    batch_size = 3
+    seq_len = 3
+    d_model = 3
+    x = torch.randn(batch_size, seq_len, d_model).gt(0)
+    y = torch.randn(batch_size, seq_len, d_model).gt(0)
+    print(x.shape)
+    print(x[:, :-1].shape)
+
+    print(x)
+    print(y)
+    print(torch.logical_or(x, y))
