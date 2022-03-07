@@ -70,13 +70,13 @@ class TransformerDecoder(nn.Module):
         self,
         vocab_size: int,
         max_len: int,
-        pad_idx: int = 0,
-        d_model: int = 512,
-        N: int = 6,
-        d_ff: int = 2048,
-        heads_num: int = 8,
-        dropout_rate: float = 0.1,
-        layer_norm_eps: float = 1e-5,
+        pad_idx: int,
+        d_model: int,
+        N: int,
+        d_ff: int,
+        heads_num: int,
+        dropout_rate: float,
+        layer_norm_eps: float,
     ) -> None:
         self.embedding = Embeddings(vocab_size, d_model, pad_idx)
         self.positional_encoding = PositionalEncoding(d_model, max_len)
