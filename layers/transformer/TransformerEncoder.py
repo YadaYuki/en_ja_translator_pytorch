@@ -61,7 +61,8 @@ class TransformerEncoder(nn.Module):
         dropout_rate: float,
         layer_norm_eps: float,
     ) -> None:
-        self.embedding = Embeddings(vocab_size, d_model, pad_idx)
+        super().__init__()
+        self.embedding = Embedding(vocab_size, d_model, pad_idx)
 
         self.positional_encoding = AddPositionalEncoding(d_model, max_len)
 
