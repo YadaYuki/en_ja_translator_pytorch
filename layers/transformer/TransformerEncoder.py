@@ -2,10 +2,10 @@ import torch
 from torch import nn
 from torch.nn import LayerNorm
 
-from .Embeddings import Embeddings
+from .Embedding import Embedding
 from .FFN import FFN
 from .MultiHeadAttention import MultiHeadAttention
-from .PositionalEncoding import PositionalEncoding
+from .PositionalEncoding import AddPositionalEncoding
 
 
 class TransformerEncoderLayer(nn.Module):
@@ -17,6 +17,7 @@ class TransformerEncoderLayer(nn.Module):
         dropout_rate: float,
         layer_norm_eps: float,
     ) -> None:
+        super().__init__()
 
         self.multi_head_attention = MultiHeadAttention(d_model, heads_num)
         self.dropout_self_attention = nn.Dropout(dropout_rate)
@@ -62,7 +63,7 @@ class TransformerEncoder(nn.Module):
     ) -> None:
         self.embedding = Embeddings(vocab_size, d_model, pad_idx)
 
-        self.positional_encoding = PositionalEncoding(d_model, max_len)
+        self.positional_encoding = AddPositionalEncoding(d_model, max_len)
 
         self.encoder_layers = nn.ModuleList(
             [
