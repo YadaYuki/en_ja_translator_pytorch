@@ -153,3 +153,7 @@ def test_transformer_decoder_shape() -> None:
     )
 
     assert output.shape == (batch_size, max_len, d_model)
+
+
+def test_transformer_decoder_shape() -> None:
+    pass

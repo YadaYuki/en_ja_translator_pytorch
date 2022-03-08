@@ -9,11 +9,11 @@ class Transformer(nn.Module):
         self,
         src_vocab_size: int,
         tgt_vocab_size: int,
-        d_model: int,
         max_len: int,
-        heads_num: int,
-        d_ff: int,
-        N: int,
+        d_model: int = 512,
+        heads_num: int = 8,
+        d_ff: int = 2048,
+        N: int = 6,
         dropout_rate: float = 0.1,
         layer_norm_eps: float = 1e-5,
         pad_idx: int = 0,
@@ -75,7 +75,7 @@ class Transformer(nn.Module):
 
         if tgt is not None:
 
-            tgt = tgt[:, :-1]  # 入力は最後の<eos>を除く
+            # tgt = tgt[:, :-1]  # 入力は最後の<eos>を除く
 
             mask_self_attn = torch.logical_or(
                 self._subsequent_mask(tgt), self._pad_mask(tgt)
