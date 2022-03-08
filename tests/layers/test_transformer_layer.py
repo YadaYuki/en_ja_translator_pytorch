@@ -2,6 +2,10 @@ import torch
 
 from layers.transformer.FFN import FFN
 from layers.transformer.PositionalEncoding import AddPositionalEncoding
+from layers.transformer.TransfomerDecoder import (
+    TransformerDecoder,
+    TransformerDecoderLayer,
+)
 from layers.transformer.TransformerEncoder import (
     TransformerEncoder,
     TransformerEncoderLayer,
@@ -73,4 +77,79 @@ def test_transformer_encoder_shape() -> None:
     x = torch.randint(vocab_size, (batch_size, max_len))
     mask = torch.randn(batch_size, max_len, max_len).eq(0)
     output = transformer_encoder(x, mask)
+    assert output.shape == (batch_size, max_len, d_model)
+
+
+def test_transformer_decoder_layer_shape() -> None:
+
+    d_model = 512
+    d_ff = 2048
+    heads_num = 8
+    dropout_rate = 0.1
+    layer_norm_eps = 1e-6
+    max_len = 128
+    batch_size = 5
+
+    transformer_decoder = TransformerDecoderLayer(
+        d_model,
+        d_ff,
+        heads_num,
+        dropout_rate,
+        layer_norm_eps,
+    )
+
+    tgt = torch.randn(batch_size, max_len, d_model)
+    src = torch.randn(batch_size, max_len, d_model)
+
+    mask_src_tgt = torch.randn(batch_size, max_len, max_len).gt(0.5)
+    mask_self = torch.randn(batch_size, max_len, max_len).gt(0.5)
+
+    output = transformer_decoder(
+        tgt,
+        src,
+        mask_src_tgt,
+        mask_self,
+    )
+
+    assert output.shape == (batch_size, max_len, d_model)
+
+
+def test_transformer_decoder_shape() -> None:
+
+    d_model = 512
+    d_ff = 2048
+    heads_num = 8
+    dropout_rate = 0.1
+    layer_norm_eps = 1e-6
+    max_len = 128
+    batch_size = 5
+    tgt_vocab_size = 5000
+    N = 6
+    pad_idx = 0
+
+    transformer_decoder = TransformerDecoder(
+        tgt_vocab_size,
+        max_len,
+        pad_idx,
+        d_model,
+        N,
+        d_ff,
+        heads_num,
+        dropout_rate,
+        layer_norm_eps,
+    )
+
+    tgt = torch.randint(tgt_vocab_size, (batch_size, max_len))
+    src = torch.randn(batch_size, max_len, d_model)
+
+    mask_src_tgt = torch.randn(batch_size, max_len, max_len).gt(0.5)
+    mask_self = torch.randn(batch_size, max_len, max_len).gt(0.5)
+
+    output = transformer_decoder(
+        tgt,
+        src,
+        mask_src_tgt,
+        mask_self,
+    )
+
     assert output.shape == (batch_size, max_len, d_model)
