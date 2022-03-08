@@ -55,9 +55,9 @@ class MultiHeadAttention(nn.Module):
         )  # head, batch_size, d_k, seq_len
 
         """Split heads"""
-        q = q.view(self.h * batch_size, seq_len, self.d_model)
-        k = k.view(self.h * batch_size, seq_len, self.d_model)
-        v = v.view(self.h * batch_size, seq_len, self.d_model)
+        q = q.view(self.h * batch_size, seq_len, self.d_k)
+        k = k.view(self.h * batch_size, seq_len, self.d_k)
+        v = v.view(self.h * batch_size, seq_len, self.d_v)
 
         if mask_3d is not None:
             mask_3d = mask_3d.repeat(self.h, 1, 1)
@@ -68,7 +68,7 @@ class MultiHeadAttention(nn.Module):
         )  # (head*batch_size, seq_len, d_model)
 
         attention_output = torch.chunk(attention_output, self.h, dim=0)
-        attention_output = torch.cat(attention_output, dim=1)
+        attention_output = torch.cat(attention_output, dim=2)
 
         """Linear after scaled dot product attention"""
         output = self.linear(attention_output)
