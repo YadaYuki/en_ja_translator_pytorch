@@ -69,7 +69,7 @@ class Transformer(nn.Module):
         """
 
         # mask
-        pad_mask_src = self.pad_mask(src)
+        pad_mask_src = self._pad_mask(src)
 
         src = self.encoder(src, pad_mask_src)
 
@@ -78,7 +78,7 @@ class Transformer(nn.Module):
             tgt = tgt[:, :-1]  # 入力は最後の<eos>を除く
 
             mask_self_attn = torch.logical_or(
-                self.subsequent_mask(tgt), self.pad_mask(tgt)
+                self._subsequent_mask(tgt), self._pad_mask(tgt)
             )
 
             dec_output = self.decoder(tgt, src, pad_mask_src, mask_self_attn)
@@ -89,7 +89,7 @@ class Transformer(nn.Module):
             output = torch.ones((batch_size, self.max_len), dtype=torch.long)
 
             for t in range(self.max_len - 1):
-                mask_tgt = self.subsequent_mask(output)
+                mask_tgt = self._subsequent_mask(output)
                 out = self.decoder(output, src, pad_mask_src, mask_tgt)
                 out = self.linear(out)
                 out = torch.argmax(out, dim=-1)
@@ -97,7 +97,7 @@ class Transformer(nn.Module):
 
             return output
 
-    def pad_mask(self, x: torch.Tensor) -> torch.Tensor:
+    def _pad_mask(self, x: torch.Tensor) -> torch.Tensor:
         """単語のid列(ex:[[4,1,9,11,0,0,0...],[4,1,9,11,0,0,0...],[4,1,9,11,0,0,0...]...])からmaskを作成する.
         Parameters:
         ----------
@@ -110,7 +110,7 @@ class Transformer(nn.Module):
         mask = mask.repeat(1, seq_len, 1)  # (batch_size, max_len, max_len)
         return mask
 
-    def subsequent_mask(self, x: torch.Tensor) -> torch.Tensor:
+    def _subsequent_mask(self, x: torch.Tensor) -> torch.Tensor:
         """DecoderのMasked-Attentionに使用するmaskを作成する.
         Parameters:
         ----------

@@ -5,7 +5,7 @@ from torch.nn import LayerNorm
 from .Embeddings import Embeddings
 from .FFN import FFN
 from .MultiHeadAttention import MultiHeadAttention
-from .PositionalEncoding import PositionalEncoding
+from .PositionalEncoding import AddPositionalEncoding
 
 
 class TransformerDecoderLayer(nn.Module):
@@ -79,7 +79,7 @@ class TransformerDecoder(nn.Module):
         layer_norm_eps: float,
     ) -> None:
         self.embedding = Embeddings(vocab_size, d_model, pad_idx)
-        self.positional_encoding = PositionalEncoding(d_model, max_len)
+        self.positional_encoding = AddPositionalEncoding(d_model, max_len)
         self.decoder_layers = nn.ModuleList(
             [
                 TransformerDecoderLayer(
