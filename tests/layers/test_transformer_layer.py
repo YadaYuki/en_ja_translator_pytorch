@@ -2,7 +2,7 @@ import torch
 
 from layers.transformer.FFN import FFN
 from layers.transformer.PositionalEncoding import AddPositionalEncoding
-from layers.transformer.TransfomerDecoder import (
+from layers.transformer.TransformerDecoder import (
     TransformerDecoder,
     TransformerDecoderLayer,
 )
@@ -153,7 +153,3 @@ def test_transformer_decoder_shape() -> None:
     )
 
     assert output.shape == (batch_size, max_len, d_model)
-
-
-def test_transformer_decoder_shape() -> None:
-    pass

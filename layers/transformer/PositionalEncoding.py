@@ -11,7 +11,8 @@ class AddPositionalEncoding(nn.Module):
         self.positional_encoding_weight: torch.Tensor = self._initialize_weight()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return x + self.positional_encoding_weight.unsqueeze(0)
+        seq_len = x.size(1)
+        return x + self.positional_encoding_weight[:seq_len, :].unsqueeze(0)
 
     def _get_positional_encoding(self, pos: int, i: int) -> float:
         w = pos / (10000 ** (((2 * i) // 2) / self.d_model))
