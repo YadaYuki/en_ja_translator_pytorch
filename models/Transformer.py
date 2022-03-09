@@ -1,5 +1,5 @@
 import torch
-from layers.transformer.TransfomerDecoder import TransformerDecoder
+from layers.transformer.TransformerDecoder import TransformerDecoder
 from layers.transformer.TransformerEncoder import TransformerEncoder
 from torch import nn
 
@@ -58,7 +58,7 @@ class Transformer(nn.Module):
 
         self.linear = nn.Linear(d_model, tgt_vocab_size)
 
-    def forward(self, src: torch.Tensor, tgt: torch.Tensor) -> torch.Tensor:
+    def forward(self, src: torch.Tensor, tgt: torch.Tensor = None) -> torch.Tensor:
         """
         Parameters:
         ----------
@@ -75,27 +75,31 @@ class Transformer(nn.Module):
 
         if tgt is not None:
 
-            # tgt = tgt[:, :-1]  # 入力は最後の<eos>を除く
-
             mask_self_attn = torch.logical_or(
                 self._subsequent_mask(tgt), self._pad_mask(tgt)
             )
 
             dec_output = self.decoder(tgt, src, pad_mask_src, mask_self_attn)
+
             return self.linear(dec_output)
+
         else:
+
             batch_size = src.size(0)
 
-            output = torch.ones((batch_size, self.max_len), dtype=torch.long)
+            tgt = torch.zeros((batch_size, self.max_len), dtype=torch.long)  # "<BOS>"
+            tgt[:, 0] = 1
 
             for t in range(self.max_len - 1):
-                mask_tgt = self._subsequent_mask(output)
-                out = self.decoder(output, src, pad_mask_src, mask_tgt)
+                mask_self_attn = torch.logical_or(
+                    self._subsequent_mask(tgt), self._pad_mask(tgt)
+                )
+                out = self.decoder(tgt, src, pad_mask_src, mask_self_attn)
                 out = self.linear(out)
-                out = torch.argmax(out, dim=-1)
-                output[:, t + 1] = out
+                out = torch.argmax(out, dim=2)
+                tgt[:, t + 1] = out[:, t + 1]
 
-            return output
+            return tgt  # [batch_size, max_len]
 
     def _pad_mask(self, x: torch.Tensor) -> torch.Tensor:
         """単語のid列(ex:[[4,1,9,11,0,0,0...],[4,1,9,11,0,0,0...],[4,1,9,11,0,0,0...]...])からmaskを作成する.
