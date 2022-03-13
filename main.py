@@ -8,11 +8,6 @@ from torch import nn
 
 from layers.transformer.TransformerDecoder import TransformerDecoder
 
-# from torch.utils.data import DataLoader
-
-# from const.path import TOK_CORPUS_PATH
-# from layers.transformer.FFN import FFN
-
 
 def pad_mask(x: torch.Tensor, seq_len: int) -> torch.Tensor:
     mask = x.eq(0)  # 0 is <pad> in vocab
