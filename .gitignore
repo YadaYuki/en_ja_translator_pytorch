@@ -141,3 +141,5 @@ cython_debug/
 corpus/
 
 pickles/
+
+su/
