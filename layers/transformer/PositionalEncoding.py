@@ -4,11 +4,14 @@ from torch import nn
 
 
 class AddPositionalEncoding(nn.Module):
-    def __init__(self, d_model: int, max_len: int) -> None:
+    def __init__(
+        self, d_model: int, max_len: int, device: torch.device = torch.device("cpu")
+    ) -> None:
         super().__init__()
         self.d_model = d_model
         self.max_len = max_len
-        self.positional_encoding_weight: torch.Tensor = self._initialize_weight()
+        positional_encoding_weight: torch.Tensor = self._initialize_weight().to(device)
+        self.register_buffer("positional_encoding_weight", positional_encoding_weight)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         seq_len = x.size(1)

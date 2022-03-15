@@ -60,11 +60,12 @@ class TransformerEncoder(nn.Module):
         heads_num: int,
         dropout_rate: float,
         layer_norm_eps: float,
+        device: torch.device = torch.device("cpu"),
     ) -> None:
         super().__init__()
         self.embedding = Embedding(vocab_size, d_model, pad_idx)
 
-        self.positional_encoding = AddPositionalEncoding(d_model, max_len)
+        self.positional_encoding = AddPositionalEncoding(d_model, max_len, device)
 
         self.encoder_layers = nn.ModuleList(
             [

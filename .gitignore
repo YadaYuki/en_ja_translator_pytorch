@@ -139,3 +139,7 @@ dmypy.json
 cython_debug/
 
 corpus/
+
+pickles/
+
+su/

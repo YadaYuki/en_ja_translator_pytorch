@@ -17,6 +17,7 @@ class Transformer(nn.Module):
         dropout_rate: float = 0.1,
         layer_norm_eps: float = 1e-5,
         pad_idx: int = 0,
+        device: torch.device = torch.device("cpu"),
     ):
 
         super().__init__()
@@ -31,6 +32,7 @@ class Transformer(nn.Module):
         self.dropout_rate = dropout_rate
         self.layer_norm_eps = layer_norm_eps
         self.pad_idx = pad_idx
+        self.device = device
 
         self.encoder = TransformerEncoder(
             src_vocab_size,
@@ -42,6 +44,7 @@ class Transformer(nn.Module):
             heads_num,
             dropout_rate,
             layer_norm_eps,
+            device,
         )
 
         self.decoder = TransformerDecoder(
@@ -54,11 +57,12 @@ class Transformer(nn.Module):
             heads_num,
             dropout_rate,
             layer_norm_eps,
+            device,
         )
 
         self.linear = nn.Linear(d_model, tgt_vocab_size)
 
-    def forward(self, src: torch.Tensor, tgt: torch.Tensor = None) -> torch.Tensor:
+    def forward(self, src: torch.Tensor, tgt: torch.Tensor) -> torch.Tensor:
         """
         Parameters:
         ----------
@@ -73,33 +77,15 @@ class Transformer(nn.Module):
 
         src = self.encoder(src, pad_mask_src)
 
-        if tgt is not None:
+        # if tgt is not None:
 
-            mask_self_attn = torch.logical_or(
-                self._subsequent_mask(tgt), self._pad_mask(tgt)
-            )
+        # target系列の"0(BOS)~max_len-1"(max_len-1系列)までを入力し、"1~max_len"(max_len-1系列)を予測する
+        mask_self_attn = torch.logical_or(
+            self._subsequent_mask(tgt), self._pad_mask(tgt)
+        )
+        dec_output = self.decoder(tgt, src, pad_mask_src, mask_self_attn)
 
-            dec_output = self.decoder(tgt, src, pad_mask_src, mask_self_attn)
-
-            return self.linear(dec_output)
-
-        else:
-
-            batch_size = src.size(0)
-
-            tgt = torch.zeros((batch_size, self.max_len), dtype=torch.long)  # "<BOS>"
-            tgt[:, 0] = 1
-
-            for t in range(self.max_len - 1):
-                mask_self_attn = torch.logical_or(
-                    self._subsequent_mask(tgt), self._pad_mask(tgt)
-                )
-                out = self.decoder(tgt, src, pad_mask_src, mask_self_attn)
-                out = self.linear(out)
-                out = torch.argmax(out, dim=2)
-                tgt[:, t + 1] = out[:, t + 1]
-
-            return tgt  # [batch_size, max_len]
+        return self.linear(dec_output)
 
     def _pad_mask(self, x: torch.Tensor) -> torch.Tensor:
         """単語のid列(ex:[[4,1,9,11,0,0,0...],[4,1,9,11,0,0,0...],[4,1,9,11,0,0,0...]...])からmaskを作成する.
@@ -112,7 +98,7 @@ class Transformer(nn.Module):
         mask = x.eq(self.pad_idx)  # 0 is <pad> in vocab
         mask = mask.unsqueeze(1)
         mask = mask.repeat(1, seq_len, 1)  # (batch_size, max_len, max_len)
-        return mask
+        return mask.to(self.device)
 
     def _subsequent_mask(self, x: torch.Tensor) -> torch.Tensor:
         """DecoderのMasked-Attentionに使用するmaskを作成する.
@@ -123,4 +109,6 @@ class Transformer(nn.Module):
         """
         batch_size = x.size(0)
         max_len = x.size(1)
-        return torch.tril(torch.ones(batch_size, max_len, max_len)).eq(0)
+        return (
+            torch.tril(torch.ones(batch_size, max_len, max_len)).eq(0).to(self.device)
+        )
