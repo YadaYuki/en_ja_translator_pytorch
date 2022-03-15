@@ -1,4 +1,4 @@
-from typing import Generator, List
+from typing import Generator, List, Optional
 
 from torchtext.vocab import Vocab, build_vocab_from_iterator
 
@@ -16,11 +16,9 @@ def get_vocab(
         EOS,
         BOS,
     ],
+    vocab_size: Optional[int] = None,
 ) -> Vocab:
-    return build_vocab_from_iterator(
-        _yield_token(path_to_corpus),
-        specials=specials,
-    )
+    return build_vocab_from_iterator(_yield_token(path_to_corpus), specials=specials)
 
 
 def _yield_token(path_to_corpus: str) -> Generator[List[str], None, None]:

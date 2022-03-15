@@ -26,7 +26,7 @@ def text_to_tensor(
     return tensor.to(torch.long)
 
 
-def tensor_to_text(tensor: torch.Tensor, vocab: Vocab) -> List[str]:
+def tensor_to_text(tensor: torch.Tensor, vocab: Vocab) -> str:
     text = []
     for i in range(tensor.size(0)):
         text.append(vocab.lookup_token(tensor[i]))
