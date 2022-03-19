@@ -18,7 +18,9 @@ def get_vocab(
     ],
     vocab_size: Optional[int] = None,
 ) -> Vocab:
-    return build_vocab_from_iterator(_yield_token(path_to_corpus), specials=specials)
+    return build_vocab_from_iterator(
+        _yield_token(path_to_corpus), specials=specials, max_tokens=vocab_size
+    )
 
 
 def _yield_token(path_to_corpus: str) -> Generator[List[str], None, None]:
