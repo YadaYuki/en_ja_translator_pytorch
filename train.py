@@ -84,15 +84,15 @@ class Trainer:
         return loss, output
 
     def fit(
-        self, train_loader: DataLoader, val_loader: DataLoader, print_log: bool = False
+        self, train_loader: DataLoader, val_loader: DataLoader, print_log: bool = True
     ) -> Tuple[List[float], List[float]]:
         # train
         train_losses: List[float] = []
         if print_log:
             print(f"{'-'*20 + 'Train' + '-'*20}")
         for i, (src, tgt) in enumerate(train_loader):
-            src = src.to(device)
-            tgt = tgt.to(device)
+            src = src.to(self.device)
+            tgt = tgt.to(self.device)
             loss, output = trainer.train_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
@@ -101,7 +101,6 @@ class Trainer:
                 print(
                     f"train loss: {loss.item()}," + f"iter: {i+1}/{len(train_loader)}"
                 )
-
             train_losses.append(loss.item())
 
         # validation
@@ -109,8 +108,8 @@ class Trainer:
         if print_log:
             print(f"{'-'*20 + 'Validation' + '-'*20}")
         for i, (src, tgt) in enumerate(val_loader):
-            src = src.to(device)
-            tgt = tgt.to(device)
+            src = src.to(self.device)
+            tgt = tgt.to(self.device)
             loss, output = trainer.val_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
@@ -186,8 +185,6 @@ if __name__ == "__main__":
         pad_idx=pad_idx,
         device=device,
     )
-    net.to(device)
-
     """
     4.Define dataset & dataloader
     """
@@ -233,50 +230,17 @@ if __name__ == "__main__":
         nn.CrossEntropyLoss(),
         device,
     )
-
-    train_losses = []
-    val_losses = []
+    train_losses: List[float] = []
+    val_losses: List[float] = []
     for i in range(epoch):
         print(f"epoch: {i}")
-
-        # train
-        print(f"{'-'*20 + 'train' + '-'*20}")
-        train_loss = 0.0
-        for i, (src, tgt) in enumerate(train_loader):
-            src = src.to(device)
-            tgt = tgt.to(device)
-            loss, output = trainer.train_step(src, tgt)
-            print()
-            print(f"loss: {loss.item()}, iter: {i+1}/{len(train_loader)}")
-            train_loss += loss.item()
-            src = src.to("cpu")
-            tgt = tgt.to("cpu")
-            output_word_ids = output.max(-1)[1]
-            for i in range(10):
-                print(f"output: {tgt_tensor_to_text(output_word_ids[i])}")
-
-        train_losses.append(train_loss / len(train_loader))
-
-        # validation
-        print(f"{'-'*20 + 'validation' + '-'*20}")
-        val_loss = 0.0
-        for i, (src, tgt) in enumerate(val_loader):
-            loss, output = trainer.val_step(src.to(device), tgt.to(device))
-            print(f"loss: {loss.item()}, iter: {i+1}/{len(val_loader)}")
-            val_loss += loss.item()
-
-            output_word_ids = output.max(-1)[1]
-            for i in range(10):
-                print(f"output: {tgt_tensor_to_text(output_word_ids[i])}")
-
-        print(f"train_loss: {train_loss / len(train_loader)}")
-        val_losses.append(val_loss / len(val_loader))
-
-        # save model
-        torch.save(net, join(NN_MODEL_PICKLES_PATH, f"epoch_{i}.pt"))
+        train_losses_per_epoch, val_losses_per_epoch = trainer.fit(
+            train_loader, val_loader, print_log=True
+        )
+        torch.save(trainer.net, join(NN_MODEL_PICKLES_PATH, f"epoch_{i}.pt"))
 
     """
-    6.Test: FUTURE DEVELOPMENT!!! (TODO)
+    6.Test
     """
 
     """
