@@ -1,9 +1,7 @@
 from os.path import join
 from typing import List, Tuple
 
-import numpy as np
 import torch
-import torch.nn.functional as F
 from matplotlib import pyplot as plt
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -93,7 +91,7 @@ class Trainer:
         for i, (src, tgt) in enumerate(train_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
-            loss, output = trainer.train_step(src, tgt)
+            loss, _ = trainer.train_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
 
@@ -110,7 +108,7 @@ class Trainer:
         for i, (src, tgt) in enumerate(val_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
-            loss, output = trainer.val_step(src, tgt)
+            loss, _ = trainer.val_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
 
@@ -120,6 +118,19 @@ class Trainer:
             val_losses.append(loss.item())
 
         return train_losses, val_losses
+
+    def test(self, test_data_loader: DataLoader) -> List[float]:
+        test_losses: List[float] = []
+        for i, (src, tgt) in enumerate(test_data_loader):
+            src = src.to(self.device)
+            tgt = tgt.to(self.device)
+            loss, _ = trainer.val_step(src, tgt)
+            src = src.to("cpu")
+            tgt = tgt.to("cpu")
+
+            test_losses.append(loss.item())
+
+        return test_losses
 
 
 if __name__ == "__main__":
@@ -221,6 +232,17 @@ if __name__ == "__main__":
     )
     val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=True)
 
+    TEST_SRC_CORPUS_PATH
+    TEST_TGT_CORPUS_PATH
+    test_dataset = KfttDataset(
+        TEST_SRC_CORPUS_PATH,
+        TEST_TGT_CORPUS_PATH,
+        max_len,
+        src_text_to_tensor,
+        tgt_text_to_tensor,
+    )
+    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
+
     """
     5.Train
     """
@@ -237,17 +259,19 @@ if __name__ == "__main__":
         train_losses_per_epoch, val_losses_per_epoch = trainer.fit(
             train_loader, val_loader, print_log=True
         )
+        train_losses.extend(train_losses_per_epoch)
+        val_losses.extend(val_losses_per_epoch)
         torch.save(trainer.net, join(NN_MODEL_PICKLES_PATH, f"epoch_{i}.pt"))
 
     """
     6.Test
     """
-
+    trainer.test(test_loader)
     """
     7.Plot & save
     """
     x = list(range(epoch))
-    plt.plot(x, train_loss, label="train")
-    plt.plot(x, val_loss, label="val")
+    plt.plot(x, train_losses, label="train")
+    plt.plot(x, val_losses, label="val")
     plt.legend()
     plt.savefig(join(FIGURE_PATH, "loss.png"))
