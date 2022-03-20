@@ -177,7 +177,7 @@ if __name__ == "__main__":
     batch_size = 100
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    epoch = 2
+    epoch = 10
 
     print(f"src_vocab_size: {src_vocab_size}")
     print(f"tgt_vocab_size: {tgt_vocab_size}")
