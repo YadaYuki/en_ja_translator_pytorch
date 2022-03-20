@@ -1,5 +1,3 @@
-from typing import List
-
 import torch
 from torchtext.vocab import Vocab
 from utils.text.vocab import BOS, EOS, PAD, UNK, tokenize_sentence

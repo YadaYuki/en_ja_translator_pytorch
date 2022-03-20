@@ -16,6 +16,7 @@ from models import Transformer
 
 # from su.Transformer import Transformer as TransformerSugomori
 from utils.dataset.Dataset import KfttDataset
+from utils.evaluation.bleu import BleuScore
 from utils.text.text import tensor_to_text, text_to_tensor
 from utils.text.vocab import get_vocab
 
@@ -26,12 +27,14 @@ class Trainer:
         net: nn.Module,
         optimizer: optim.Optimizer,
         critetion: nn.Module,
+        bleu_score: BleuScore,
         device: torch.device,
     ) -> None:
         self.net = net
         self.optimizer = optimizer
         self.critetion = critetion
         self.device = device
+        self.bleu_score = bleu_score
         self.net = self.net.to(self.device)
 
     def loss_fn(self, preds: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
@@ -39,15 +42,14 @@ class Trainer:
 
     def train_step(
         self, src: torch.Tensor, tgt: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> Tuple[torch.Tensor, torch.Tensor, float]:
         self.net.train()
         output = self.net(src, tgt)
-        # vocab_size = output.shape[-1]
 
-        # convert tgt to one-hot
         tgt = tgt[:, 1:]  # decoderからの出力は1 ~ max_lenまでなので、0以降のデータで誤差関数を計算する
         output = output[:, :-1, :]  #
-        # print(output.shape, tgt.shape)
+
+        # calculate loss
         loss = self.loss_fn(
             output.contiguous().view(
                 -1,
@@ -55,12 +57,17 @@ class Trainer:
             ),
             tgt.contiguous().view(-1),
         )
+
+        # calculate bleu score
+        _, output_ids = torch.max(output, dim=-1)
+        bleu_score = self.bleu_score(tgt, output_ids)
+
         with torch.autograd.detect_anomaly():
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
-        return loss, output
+        return loss, output, bleu_score
 
     def val_step(
         self, src: torch.Tensor, tgt: torch.Tensor
@@ -83,23 +90,27 @@ class Trainer:
 
     def fit(
         self, train_loader: DataLoader, val_loader: DataLoader, print_log: bool = True
-    ) -> Tuple[List[float], List[float]]:
+    ) -> Tuple[List[float], List[float], List[float]]:
         # train
         train_losses: List[float] = []
+        bleu_scores: List[float] = []
         if print_log:
             print(f"{'-'*20 + 'Train' + '-'*20}")
         for i, (src, tgt) in enumerate(train_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
-            loss, _ = self.train_step(src, tgt)
+            loss, _, bleu_score = self.train_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
 
             if print_log:
                 print(
-                    f"train loss: {loss.item()}," + f"iter: {i+1}/{len(train_loader)}"
+                    f"train loss: {loss.item()}, bleu score: {bleu_score}"
+                    + f"iter: {i+1}/{len(train_loader)}"
                 )
+
             train_losses.append(loss.item())
+            bleu_scores.append(bleu_score)
 
         # validation
         val_losses: List[float] = []
@@ -117,7 +128,7 @@ class Trainer:
 
             val_losses.append(loss.item())
 
-        return train_losses, val_losses
+        return train_losses, bleu_scores, val_losses
 
     def test(self, test_data_loader: DataLoader) -> List[float]:
         test_losses: List[float] = []
@@ -241,16 +252,21 @@ if __name__ == "__main__":
         net,
         optim.Adam(net.parameters(), lr=0.001, betas=(0.9, 0.999), amsgrad=True),
         nn.CrossEntropyLoss(),
+        BleuScore(tgt_vocab),
         device,
     )
     train_losses: List[float] = []
     val_losses: List[float] = []
+    bleu_scores: List[float] = []
     for i in range(epoch):
         print(f"epoch: {i}")
-        train_losses_per_epoch, val_losses_per_epoch = trainer.fit(
-            train_loader, val_loader, print_log=True
-        )
+        (
+            train_losses_per_epoch,
+            bleu_scores_per_epoch,
+            val_losses_per_epoch,
+        ) = trainer.fit(train_loader, val_loader, print_log=True)
         train_losses.extend(train_losses_per_epoch)
+        bleu_scores.extend(bleu_scores_per_epoch)
         val_losses.extend(val_losses_per_epoch)
         torch.save(trainer.net, join(NN_MODEL_PICKLES_PATH, f"epoch_{i}.pt"))
 
@@ -262,6 +278,7 @@ if __name__ == "__main__":
     7.Plot & save
     """
     plt.plot(list(range(len(train_losses))), train_losses, label="train")
+    plt.plot(list(range(len(bleu_scores))), bleu_scores, label="bleu_score")
     plt.legend()
     plt.savefig(join(FIGURE_PATH, "train_loss.png"))
 
