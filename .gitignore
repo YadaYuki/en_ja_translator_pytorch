@@ -138,6 +138,10 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-corpus/
+corpus/*
+!corpus/.gitkeep
 
-pickles/
+pickles/nn/*
+!pickles/nn/.gitkeep
+
+shell/
