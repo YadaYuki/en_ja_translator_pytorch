@@ -32,7 +32,7 @@ class Trainer:
         self.optimizer = optimizer
         self.critetion = critetion
         self.device = device
-        self.net.to(self.device)
+        self.net = self.net.to(self.device)
 
     def loss_fn(self, preds: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         return self.critetion(preds, labels)
@@ -91,7 +91,7 @@ class Trainer:
         for i, (src, tgt) in enumerate(train_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
-            loss, _ = trainer.train_step(src, tgt)
+            loss, _ = self.train_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
 
@@ -108,7 +108,7 @@ class Trainer:
         for i, (src, tgt) in enumerate(val_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
-            loss, _ = trainer.val_step(src, tgt)
+            loss, _ = self.val_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
 
@@ -147,23 +147,14 @@ if __name__ == "__main__":
     TEST_SRC_CORPUS_PATH = join(KFTT_TOK_CORPUS_PATH, "kyoto-test.en")
     TEST_TGT_CORPUS_PATH = join(KFTT_TOK_CORPUS_PATH, "kyoto-test.ja")
 
-    src_vocab = get_vocab(TRAIN_SRC_CORPUS_PATH, vocab_size=10000)
-    tgt_vocab = get_vocab(TRAIN_TGT_CORPUS_PATH, vocab_size=10000)
+    src_vocab = get_vocab(TRAIN_SRC_CORPUS_PATH, vocab_size=20000)
+    tgt_vocab = get_vocab(TRAIN_TGT_CORPUS_PATH, vocab_size=20000)
 
     """
     2.Define Parameters # TODO: from arguement or config file(hydra)
     """
     src_vocab_size = len(src_vocab)
     tgt_vocab_size = len(tgt_vocab)
-    # max_len = 24
-    # d_model = 512
-    # heads_num = 8
-    # d_ff = 2048
-    # N = 6
-    # dropout_rate = 0.1
-    # layer_norm_eps = 1e-5
-    # pad_idx = 0
-    # batch_size = 128
     max_len = 24
     d_model = 128
     heads_num = 4
@@ -175,7 +166,7 @@ if __name__ == "__main__":
     batch_size = 100
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    epoch = 10
+    epoch = 2
 
     print(f"src_vocab_size: {src_vocab_size}")
     print(f"tgt_vocab_size: {tgt_vocab_size}")
@@ -266,12 +257,14 @@ if __name__ == "__main__":
     """
     6.Test
     """
-    trainer.test(test_loader)
+    test_losses = trainer.test(test_loader)
     """
     7.Plot & save
     """
-    x = list(range(epoch))
-    plt.plot(x, train_losses, label="train")
-    plt.plot(x, val_losses, label="val")
+    plt.plot(list(range(len(train_losses))), train_losses, label="train")
     plt.legend()
-    plt.savefig(join(FIGURE_PATH, "loss.png"))
+    plt.savefig(join(FIGURE_PATH, "train_loss.png"))
+
+    print(f"train_losses: {train_losses}")
+    print(f"val_losses: {val_losses}")
+    print(f"test_losses: {test_losses}")
