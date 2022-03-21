@@ -1,13 +1,34 @@
 # English to Japanese Translator by [pytorch](https://pytorch.org/) 🙊 ([Transformer](https://arxiv.org/abs/1706.03762) from scratch)
 
+[![GitHub license](https://img.shields.io/github/license/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch) [![GitHub issues](https://img.shields.io/github/issues/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch/issues) [![GitHub forks](https://img.shields.io/github/forks/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch/network) [![GitHub stars](https://img.shields.io/github/stars/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch/stargazers)
+
 ## Overview
 
-- English to Japanese translator by Pytorch.
+- English to Japanese translator by [Pytorch](https://pytorch.org/).
 - The neural network architecture is [Transformer](https://arxiv.org/abs/1706.03762).
 - The layers for Transfomer are implemented from scratch by pytorch. (you can find them under [layers/transformer/](https://github.com/YadaYuki/en_ja_translator_pytorch/tree/master/layers/transformer))
 - Parallel corpus(dataset) is [kftt](http://www.phontron.com/kftt/index-ja.html).
 
 ## Transformer
+
+## Requirements
+
+- [poetry](https://python-poetry.org/) 1.0.10+
+- [python](https://www.python.org/) 3.8+
+
+## Setup
+
+Install dependencies & create a virtual environment in project by running:
+
+```
+$ poetry install
+```
+
+Download & unzip parallel corpus([kftt](http://www.phontron.com/kftt/index-ja.html)) by running:
+
+```
+$ poetry run python ./utils/download.py
+```
 
 ## Directories
 
@@ -51,8 +72,6 @@ The directory structure is as below.
     └── text/
 ```
 
-## Setup
-
-## How to use
+## How to run
 
 ## Reference
