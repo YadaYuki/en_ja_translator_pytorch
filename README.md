@@ -11,6 +11,13 @@
 
 ## Transformer
 
+![image](https://user-images.githubusercontent.com/57289763/159227403-edf771bf-e639-48f7-befe-763471e646da.png)
+
+- Transformer is a neural network model proposed in the paper ‘[Attention Is All You Need](https://arxiv.org/abs/1706.03762)’
+
+- As the paper's title said, transformer is a model based on Attention mechanism. Transformer does not use recursive calculation when training like RNN,LSTM
+- Many of the models that have achieved high accuracy in various tasks in the NLP domain in recent years, such as BERT, GPT-3, and XLNet, have a Transformer-based structure.
+
 ## Requirements
 
 - [poetry](https://python-poetry.org/) 1.0.10+
