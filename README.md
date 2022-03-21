@@ -1,7 +1,5 @@
 # English to Japanese Translator by [pytorch](https://pytorch.org/) 🙊 ([Transformer](https://arxiv.org/abs/1706.03762) from scratch)
 
-[![GitHub license](https://img.shields.io/github/license/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch) [![GitHub issues](https://img.shields.io/github/issues/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch/issues) [![GitHub forks](https://img.shields.io/github/forks/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch/network) [![GitHub stars](https://img.shields.io/github/stars/YadaYuki/en_ja_translator_pytorch)](https://github.com/YadaYuki/en_ja_translator_pytorch/stargazers)
-
 ## Overview
 
 - English to Japanese translator by [Pytorch](https://pytorch.org/).
