@@ -13,8 +13,6 @@ from const.path import (
     TANAKA_CORPUS_PATH,
 )
 from models import Transformer
-
-# from su.Transformer import Transformer as TransformerSugomori
 from utils.dataset.Dataset import KfttDataset
 from utils.evaluation.bleu import BleuScore
 from utils.text.text import tensor_to_text, text_to_tensor
@@ -71,7 +69,7 @@ class Trainer:
 
     def val_step(
         self, src: torch.Tensor, tgt: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, bleu_score]:
+    ) -> Tuple[torch.Tensor, torch.Tensor, float]:
         self.net.eval()
         output = self.net(src, tgt)
 
@@ -107,7 +105,7 @@ class Trainer:
 
             if print_log:
                 print(
-                    f"train loss: {loss.item()}, bleu score: {bleu_score}"
+                    f"train loss: {loss.item()}, bleu score: {bleu_score},"
                     + f"iter: {i+1}/{len(train_loader)}"
                 )
 
@@ -145,7 +143,7 @@ class Trainer:
             tgt = tgt.to("cpu")
 
             test_losses.append(loss.item())
-            test_bleu_scores.append(bleu_scores)
+            test_bleu_scores.append(bleu_score)
 
         return test_losses, test_bleu_scores
 

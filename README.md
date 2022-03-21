@@ -2,9 +2,12 @@
 
 ## Overview
 
-## Transformer
+- English to Japanese translator by Pytorch.
+- The neural network architecture is [Transformer](https://arxiv.org/abs/1706.03762).
+- The layers for Transfomer are implemented from scratch by pytorch. (you can find them under [layers/transformer/](https://github.com/YadaYuki/en_ja_translator_pytorch/tree/master/layers/transformer))
+- Parallel corpus(dataset) is [kftt](http://www.phontron.com/kftt/index-ja.html).
 
-## Dataset
+## Transformer
 
 ## Directories
 
@@ -49,3 +52,5 @@
 ## Setup
 
 ## How to use
+
+## Reference
