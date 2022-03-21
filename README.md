@@ -30,6 +30,12 @@ Download & unzip parallel corpus([kftt](http://www.phontron.com/kftt/index-ja.ht
 $ poetry run python ./utils/download.py
 ```
 
+set PYTHONPATH
+
+```
+export PYTHONPATH="$(pwd)"
+```
+
 ## Directories
 
 The directory structure is as below.
@@ -74,4 +80,38 @@ The directory structure is as below.
 
 ## How to run
 
+You can train model by running:
+
+```
+$ poetry run python train.py
+
+epoch: 1
+--------------------Train--------------------
+
+train loss: 10.104473114013672, bleu score: 0.0,iter: 1/4403
+
+train loss: 9.551202774047852, bleu score: 0.0,iter: 2/4403
+
+train loss: 8.950608253479004, bleu score: 0.0,iter: 3/4403
+
+train loss: 8.688143730163574, bleu score: 0.0,iter: 4/4403
+
+train loss: 8.4220552444458, bleu score: 0.0,iter: 5/4403
+
+train loss: 8.243291854858398, bleu score: 0.0,iter: 6/4403
+
+train loss: 8.187620162963867, bleu score: 0.0,iter: 7/4403
+
+train loss: 7.6360859870910645, bleu score: 0.0,iter: 8/4403
+
+....
+```
+
+- For each epoch, the model at that point is saved under pickles/nn/
+- When the training is finished, loss.png is saved under figure/
+
 ## Reference
+
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+
+## Licence
