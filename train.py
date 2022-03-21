@@ -13,8 +13,6 @@ from const.path import (
     TANAKA_CORPUS_PATH,
 )
 from models import Transformer
-
-# from su.Transformer import Transformer as TransformerSugomori
 from utils.dataset.Dataset import KfttDataset
 from utils.evaluation.bleu import BleuScore
 from utils.text.text import tensor_to_text, text_to_tensor
@@ -62,16 +60,15 @@ class Trainer:
         _, output_ids = torch.max(output, dim=-1)
         bleu_score = self.bleu_score(tgt, output_ids)
 
-        with torch.autograd.detect_anomaly():
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
         return loss, output, bleu_score
 
     def val_step(
         self, src: torch.Tensor, tgt: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> Tuple[torch.Tensor, torch.Tensor, float]:
         self.net.eval()
         output = self.net(src, tgt)
 
@@ -85,17 +82,19 @@ class Trainer:
             ),
             tgt.contiguous().view(-1),
         )
+        _, output_ids = torch.max(output, dim=-1)
+        bleu_score = self.bleu_score(tgt, output_ids)
 
-        return loss, output
+        return loss, output, bleu_score
 
     def fit(
         self, train_loader: DataLoader, val_loader: DataLoader, print_log: bool = True
-    ) -> Tuple[List[float], List[float], List[float]]:
+    ) -> Tuple[List[float], List[float], List[float], List[float]]:
         # train
         train_losses: List[float] = []
-        bleu_scores: List[float] = []
+        train_bleu_scores: List[float] = []
         if print_log:
-            print(f"{'-'*20 + 'Train' + '-'*20}")
+            print(f"{'-'*20 + 'Train' + '-'*20} \n")
         for i, (src, tgt) in enumerate(train_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
@@ -105,43 +104,47 @@ class Trainer:
 
             if print_log:
                 print(
-                    f"train loss: {loss.item()}, bleu score: {bleu_score}"
-                    + f"iter: {i+1}/{len(train_loader)}"
+                    f"train loss: {loss.item()}, bleu score: {bleu_score},"
+                    + f"iter: {i+1}/{len(train_loader)} \n"
                 )
 
             train_losses.append(loss.item())
-            bleu_scores.append(bleu_score)
+            train_bleu_scores.append(bleu_score)
 
         # validation
         val_losses: List[float] = []
+        val_bleu_scores: List[float] = []
         if print_log:
-            print(f"{'-'*20 + 'Validation' + '-'*20}")
+            print(f"{'-'*20 + 'Validation' + '-'*20} \n")
         for i, (src, tgt) in enumerate(val_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
-            loss, _ = self.val_step(src, tgt)
+            loss, _, bleu_score = self.val_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
 
             if print_log:
-                print(f"train loss: {loss.item()}, iter: {i+1}/{len(val_loader)}")
+                print(f"train loss: {loss.item()}, iter: {i+1}/{len(val_loader)} \n")
 
             val_losses.append(loss.item())
+            val_bleu_scores.append(bleu_score)
 
-        return train_losses, bleu_scores, val_losses
+        return train_losses, train_bleu_scores, val_losses, val_bleu_scores
 
-    def test(self, test_data_loader: DataLoader) -> List[float]:
+    def test(self, test_data_loader: DataLoader) -> Tuple[List[float], List[float]]:
         test_losses: List[float] = []
+        test_bleu_scores: List[float] = []
         for i, (src, tgt) in enumerate(test_data_loader):
             src = src.to(self.device)
             tgt = tgt.to(self.device)
-            loss, _ = trainer.val_step(src, tgt)
+            loss, _, bleu_score = trainer.val_step(src, tgt)
             src = src.to("cpu")
             tgt = tgt.to("cpu")
 
             test_losses.append(loss.item())
+            test_bleu_scores.append(bleu_score)
 
-        return test_losses
+        return test_losses, test_bleu_scores
 
 
 if __name__ == "__main__":
@@ -178,9 +181,6 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     epoch = 10
-
-    print(f"src_vocab_size: {src_vocab_size}")
-    print(f"tgt_vocab_size: {tgt_vocab_size}")
 
     """
     3.Define model
@@ -256,32 +256,41 @@ if __name__ == "__main__":
         device,
     )
     train_losses: List[float] = []
+    train_bleu_scores: List[float] = []
     val_losses: List[float] = []
-    bleu_scores: List[float] = []
+
     for i in range(epoch):
-        print(f"epoch: {i}")
+        print(f"epoch: {i + 1} \n")
         (
             train_losses_per_epoch,
-            bleu_scores_per_epoch,
+            train_bleu_scores_per_epoch,
             val_losses_per_epoch,
+            val_bleu_scores_per_epoch,
         ) = trainer.fit(train_loader, val_loader, print_log=True)
+
         train_losses.extend(train_losses_per_epoch)
-        bleu_scores.extend(bleu_scores_per_epoch)
+        train_bleu_scores.extend(train_bleu_scores_per_epoch)
         val_losses.extend(val_losses_per_epoch)
         torch.save(trainer.net, join(NN_MODEL_PICKLES_PATH, f"epoch_{i}.pt"))
 
     """
     6.Test
     """
-    test_losses = trainer.test(test_loader)
+    test_losses, test_bleu_scores = trainer.test(test_loader)
     """
     7.Plot & save
     """
-    plt.plot(list(range(len(train_losses))), train_losses, label="train")
-    plt.plot(list(range(len(bleu_scores))), bleu_scores, label="bleu_score")
-    plt.legend()
-    plt.savefig(join(FIGURE_PATH, "train_loss.png"))
 
-    print(f"train_losses: {train_losses}")
-    print(f"val_losses: {val_losses}")
-    print(f"test_losses: {test_losses}")
+    fig = plt.figure(figsize=(24, 8))
+    train_loss_ax = fig.add_subplot(1, 2, 1)
+    val_loss_ax = fig.add_subplot(1, 2, 2)
+
+    train_loss_ax.plot(list(range(len(train_losses))), train_losses, label="train loss")
+    val_loss_ax.plot(
+        list(range(len(train_bleu_scores))),
+        train_bleu_scores,
+        label="val loss",
+    )
+    train_loss_ax.legend()
+    val_loss_ax.legend()
+    plt.savefig(join(FIGURE_PATH, "loss.png"))
