@@ -11,6 +11,8 @@
 
 ## Directories
 
+The directory structure is as below.
+
 ```
 .
 ├── const
