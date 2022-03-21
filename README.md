@@ -122,3 +122,5 @@ train loss: 7.6360859870910645, bleu score: 0.0,iter: 8/4403
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
 
 ## Licence
+
+[MIT](https://github.com/YadaYuki/en_ja_translator_pytorch/blob/master/LICENSE)
