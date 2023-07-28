@@ -29,16 +29,16 @@ Install dependencies & create a virtual environment in project by running:
 $ poetry install
 ```
 
-Download & unzip parallel corpus([kftt](http://www.phontron.com/kftt/index-ja.html)) by running:
-
-```
-$ poetry run python ./utils/download.py
-```
-
 set PYTHONPATH
 
 ```
 export PYTHONPATH="$(pwd)"
+```
+
+Download & unzip parallel corpus([kftt](http://www.phontron.com/kftt/index-ja.html)) by running:
+
+```
+$ poetry run python ./utils/download.py
 ```
 
 ## Directories
