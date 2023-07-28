@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.nn import LayerNorm
 
-from .Embedding import Embedding
+from .embedding import Embedding
 from .FFN import FFN
 from .MultiHeadAttention import MultiHeadAttention
 from .PositionalEncoding import AddPositionalEncoding
